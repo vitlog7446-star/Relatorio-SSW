@@ -28,8 +28,7 @@ def baixar_relatorio():
             page.locator('[id="4"]').fill(senha)
 
 
-            with page.expect_navigation():
-                page.get_by_role("link", name="►").click()
+            page.get_by_role("link", name="►").click()
 
             campo_opcao = page.locator('[id="3"]').last
             campo_opcao.wait_for(state="visible", timeout=60000)
