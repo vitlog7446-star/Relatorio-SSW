@@ -4,29 +4,17 @@ import sys
 import traceback
 from datetime import datetime
 
-# ============================================================
-# CONFIGURAÇÕES
-# ============================================================
-
 # Horário diário da automação
 HORARIOS = ["23:30"]
 
 # Intervalo entre verificações do relógio
 INTERVALO_VERIFICACAO = 20
 
-# ============================================================
-# CONFIGURAÇÃO DO DIRETÓRIO
-# ============================================================
-
 pasta_projeto = os.path.dirname(os.path.abspath(__file__))
 os.chdir(pasta_projeto)
 
 if pasta_projeto not in sys.path:
     sys.path.insert(0, pasta_projeto)
-
-# ============================================================
-# EXECUTA A AUTOMAÇÃO
-# ============================================================
 
 def executar():
 
@@ -54,11 +42,6 @@ def executar():
         )
 
         traceback.print_exc()
-
-
-# ============================================================
-# LOOP DO AGENDAMENTO
-# ============================================================
 
 def loop_agendamento():
 
