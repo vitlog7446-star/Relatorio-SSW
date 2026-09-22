@@ -63,6 +63,9 @@ def baixar_relatorio():
             print("URL após Enter:", page.url)
             print("Título após Enter:", page.title())
 
+            print("HTML após Enter:")
+            print(page.locator("body").inner_text()[:5000])
+            
             # Verifica quantas páginas existem
             print("Número de páginas:", len(contexto.pages))
 
