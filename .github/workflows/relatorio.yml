@@ -30,4 +30,4 @@ jobs:
         run: playwright install --with-deps chromium
 
       - name: Executar automação
-        run: python envio.py
+        run: python main.py
