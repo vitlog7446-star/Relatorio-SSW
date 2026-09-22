@@ -40,6 +40,11 @@ def baixar_relatorio():
             
             # Força o evento onchange usado pelo SSW
             campo_opcao.dispatch_event("change")
+
+            print("Existe doOption?:", page.evaluate(
+            "() => typeof doOption"))
+
+            print("Valor f3:", page.locator('[name="f3"]').input_value())
             
             page.wait_for_timeout(5000)
             
@@ -86,6 +91,13 @@ def baixar_relatorio():
             page.close()
             contexto.close()
 
+            errorpanel = page.locator("#errorpanel")
+
+            print("Errorpanel existe:", errorpanel.count())
+
+            if errorpanel.count() > 0:
+                print("Conteúdo do errorpanel:", errorpanel.inner_text())
+            
             return str(arquivo_csv)
 
         finally:
