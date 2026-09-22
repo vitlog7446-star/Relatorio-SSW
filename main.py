@@ -32,48 +32,50 @@ def baixar_relatorio():
             page.locator('[id="4"]').fill(senha)
 
             # Login
-            page.get_by_role("link", name="►").click()
+            with page.expect_response("**/bin/ssw0422") as resposta_login:
+                page.get_by_role("link", name="►").click()
 
-            # Espera o AJAX do login
+            resposta = resposta_login.value
+
+            print("STATUS DO LOGIN:", resposta.status)
+            print("URL DA RESPOSTA:", resposta.url)
+            print("TIPO:", resposta.headers.get("content-type"))
+
             page.wait_for_timeout(5000)
 
             print("URL depois do login:", page.url)
             print("Título:", page.title())
 
-            # ESC - teste que fizemos
-            page.keyboard.press("Escape")
-
-            page.wait_for_timeout(1000)
-
             # Campo da opção
             campo_opcao = page.locator('[id="3"]').last
             campo_opcao.wait_for(state="visible", timeout=60000)
 
-            # TESTE: preencher 063 sem clicar antes
+            # Preenche a opção
             campo_opcao.fill("063")
 
             print("Valor do campo:", campo_opcao.input_value())
 
-            # TESTE: pressionar Enter
+            # Pressiona Enter
             campo_opcao.press("Enter")
 
-            # Espera o SSW processar o Enter
             page.wait_for_timeout(3000)
 
             print("URL após Enter:", page.url)
             print("Título após Enter:", page.title())
 
+            # Mostra o conteúdo da página após o Enter
             print("HTML após Enter:")
             print(page.locator("body").inner_text()[:5000])
-            
-            # Verifica quantas páginas existem
+
+            # Mostra as páginas abertas
             print("Número de páginas:", len(contexto.pages))
 
             for i, pagina in enumerate(contexto.pages):
                 print(f"Página {i}:", pagina.url)
 
-            # Verifica os inputs que ficaram na página
+            # Mostra os inputs existentes
             inputs = page.locator("input")
+
             print("Quantidade de inputs:", inputs.count())
 
             for i in range(inputs.count()):
