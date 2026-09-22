@@ -27,15 +27,17 @@ def baixar_relatorio():
             page.locator('[id="3"]').fill(user)
             page.locator('[id="4"]').fill(senha)
 
+            print("ajaxEnvia:", page.evaluate("() => typeof window.ajaxEnvia"))
 
-            botao_login = page.get_by_role("link", name="►")
-
-            print("HTML do botão login:")
-            print(botao_login.evaluate("(el) => el.outerHTML"))
+            def registrar_request(request):
+                if "/bin/" in request.url:
+                    print("REQUEST:", request.method, request.url)
             
-            botao_login.click()
+            page.on("request", registrar_request)
             
-            page.wait_for_timeout(3000)
+            page.get_by_role("link", name="►").click()
+            
+            page.wait_for_timeout(5000)
             
             print("URL depois do login:", page.url)
             print("Título:", page.title())
