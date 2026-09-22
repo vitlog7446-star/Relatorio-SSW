@@ -44,6 +44,8 @@ def baixar_relatorio():
 
             print("Depois do Enter:", page.url)
             print("Número de páginas:", len(contexto.pages))
+
+            op063 = page
             
             for i, pagina in enumerate(contexto.pages):
                 print(f"Página {i}: {pagina.url}")
@@ -63,7 +65,6 @@ def baixar_relatorio():
             download = download_info.value
             download.save_as(str(arquivo_csv))
 
-            op063.close()
             page.close()
             contexto.close()
 
