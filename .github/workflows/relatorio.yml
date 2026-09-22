@@ -1,0 +1,33 @@
+name: Relatório SSW
+
+on:
+  workflow_dispatch:
+
+jobs:
+  executar-relatorio:
+    runs-on: ubuntu-latest
+
+    env:
+      SSW_DOMINIO: ${{ secrets.SSW_DOMINIO }}
+      SSW_CPF: ${{ secrets.SSW_CPF }}
+      SSW_USUARIO: ${{ secrets.SSW_USUARIO }}
+      SSW_SENHA: ${{ secrets.SSW_SENHA }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Instalar Chromium
+        run: playwright install --with-deps chromium
+
+      - name: Executar automação
+        run: python envio.py
