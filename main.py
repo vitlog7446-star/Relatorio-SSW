@@ -36,11 +36,22 @@ def baixar_relatorio():
             campo_opcao.click()
             campo_opcao.fill("063")
 
-            with page.expect_popup() as popup_info:
-                page.keyboard.press("Enter")
+            print("Antes do Enter:", page.url)
 
-            op063 = popup_info.value
-            op063.wait_for_load_state('domcontentloaded')
+            page.keyboard.press("Enter")
+
+            page.wait_for_timeout(5000)
+
+            print("Depois do Enter:", page.url)
+            print("Número de páginas:", len(contexto.pages))
+
+            for i, pagina in enumerate(contexto.pages):
+                print(f"Página {i}: {pagina.url}")
+            # with page.expect_popup() as popup_info:
+            #     page.keyboard.press("Enter")
+
+            # op063 = popup_info.value
+            # op063.wait_for_load_state('domcontentloaded')
 
             op063.locator('[id="5"]').fill('0001')
             op063.locator('[id="6"]').fill("2359")
