@@ -35,15 +35,22 @@ def baixar_relatorio():
             
             campo_opcao.click()
             campo_opcao.fill("063")
-
-            print("Antes do Enter:", page.url)
-
-            page.keyboard.press("Enter")
-
+            
+            print("Valor do campo:", campo_opcao.input_value())
+            
+            # Força o evento onchange usado pelo SSW
+            campo_opcao.dispatch_event("change")
+            
             page.wait_for_timeout(5000)
-
-            print("URL atual:", page.url)
-
+            
+            print("Depois do change:", page.url)
+            print("Número de páginas:", len(contexto.pages))
+            
+            for i, pagina in enumerate(contexto.pages):
+                print(f"Página {i}: {pagina.url}")
+            
+            op063 = page
+          
             inputs = page.locator("input")
             
             print("Quantidade de inputs:", inputs.count())
@@ -59,8 +66,6 @@ def baixar_relatorio():
                     "type=", elemento.get_attribute("type"),
                     "value=", elemento.get_attribute("value")
                 )
-
-            op063 = page
             
             # with page.expect_popup() as popup_info:
             #     page.keyboard.press("Enter")
@@ -72,11 +77,11 @@ def baixar_relatorio():
             # op063.locator('[id="6"]').fill("2359")
             # op063.locator('[id="7"]').fill("s")
 
-            with op063.expect_download() as download_info:
-                op063.get_by_role("link", name="►").click()
+            # with op063.expect_download() as download_info:
+            #     op063.get_by_role("link", name="►").click()
 
-            download = download_info.value
-            download.save_as(str(arquivo_csv))
+            # download = download_info.value
+            # download.save_as(str(arquivo_csv))
 
             page.close()
             contexto.close()
