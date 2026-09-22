@@ -30,6 +30,11 @@ def baixar_relatorio():
 
             page.get_by_role("link", name="►").click()
 
+            page.wait_for_timeout(3000)
+
+            print("URL depois do login:", page.url)
+            print("Título:", page.title())
+
             campo_opcao = page.locator('[id="3"]').last
             campo_opcao.wait_for(state="visible", timeout=60000)
             
