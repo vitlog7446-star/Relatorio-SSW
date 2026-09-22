@@ -41,6 +41,13 @@ def baixar_relatorio():
             print("URL DA RESPOSTA:", resposta.url)
             print("TIPO:", resposta.headers.get("content-type"))
 
+            print("TAMANHO DA RESPOSTA:", len(resposta.body()))
+
+            texto_resposta = resposta.text()
+            
+            print("CONTEÚDO DA RESPOSTA:")
+            print(texto_resposta[:5000])
+            
             page.wait_for_timeout(5000)
 
             print("URL depois do login:", page.url)
