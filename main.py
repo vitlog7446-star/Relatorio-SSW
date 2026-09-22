@@ -28,10 +28,15 @@ def baixar_relatorio():
             page.locator('[id="4"]').fill(senha)
 
 
-            page.get_by_role("link", name="►").click()
+            botao_login = page.get_by_role("link", name="►")
 
+            print("HTML do botão login:")
+            print(botao_login.evaluate("(el) => el.outerHTML"))
+            
+            botao_login.click()
+            
             page.wait_for_timeout(3000)
-
+            
             print("URL depois do login:", page.url)
             print("Título:", page.title())
 
