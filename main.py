@@ -29,11 +29,8 @@ def baixar_relatorio():
 
             print("ajaxEnvia:", page.evaluate("() => typeof window.ajaxEnvia"))
 
-            def registrar_request(request):
-                if "/bin/" in request.url:
-                    print("REQUEST:", request.method, request.url)
-            
-            page.on("request", registrar_request)
+            print("CÓDIGO ajaxEnvia:")
+            print(page.evaluate("() => window.ajaxEnvia.toString()"))
             
             page.get_by_role("link", name="►").click()
             
