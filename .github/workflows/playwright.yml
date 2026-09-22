@@ -1,0 +1,26 @@
+name: Teste Playwright
+
+on:
+  workflow_dispatch:
+
+jobs:
+  executar-playwright:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Instalar Playwright
+        run: pip install playwright
+
+      - name: Instalar navegador Chromium
+        run: playwright install --with-deps chromium
+
+      - name: Executar teste
+        run: python teste_playwright.py
