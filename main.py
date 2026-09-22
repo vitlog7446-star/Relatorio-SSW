@@ -55,8 +55,8 @@ def baixar_relatorio():
             campo_opcao = page.locator('[id="3"]').last
             campo_opcao.wait_for(state="visible", timeout=60000)
             
-            campo_opcao.click()
             campo_opcao.fill("063")
+            campo_opcao.press("Enter")
             
             print("Valor do campo:", campo_opcao.input_value())
             
