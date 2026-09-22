@@ -39,6 +39,17 @@ def baixar_relatorio():
             print("URL depois do login:", page.url)
             print("Título:", page.title())
 
+            errorpanel = page.locator("#errorpanel")
+
+            print("Errorpanel:", errorpanel.count())
+            
+            if errorpanel.count() > 0:
+                print("Texto do errorpanel:")
+                print(repr(errorpanel.inner_text()))
+            
+                print("HTML do errorpanel:")
+                print(errorpanel.evaluate("(el) => el.outerHTML"))
+                
             campo_opcao = page.locator('[id="3"]').last
             campo_opcao.wait_for(state="visible", timeout=60000)
             
