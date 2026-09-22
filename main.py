@@ -34,7 +34,9 @@ def baixar_relatorio():
             
             page.get_by_role("link", name="►").click()
             
-            page.wait_for_timeout(5000)
+            page.wait_for_timeout(3000)
+            page.keyboard.press("Escape")
+            page.wait_for_timeout(2000)
             
             print("URL depois do login:", page.url)
             print("Título:", page.title())
