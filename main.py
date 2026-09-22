@@ -26,6 +26,7 @@ def baixar_relatorio():
                 timeout=60000
             )
 
+            # Preenche os dados de login
             page.locator('[id="1"]').fill(dominio)
             page.locator('[id="2"]').fill(cpf)
             page.locator('[id="3"]').fill(user)
@@ -44,10 +45,11 @@ def baixar_relatorio():
             print("TAMANHO DA RESPOSTA:", len(resposta.body()))
 
             texto_resposta = resposta.text()
-            
+
             print("CONTEÚDO DA RESPOSTA:")
             print(texto_resposta[:5000])
-            
+
+            # Aguarda o processamento do SSW
             page.wait_for_timeout(5000)
 
             print("URL depois do login:", page.url)
@@ -57,7 +59,7 @@ def baixar_relatorio():
             campo_opcao = page.locator('[id="3"]').last
             campo_opcao.wait_for(state="visible", timeout=60000)
 
-            # Preenche a opção
+            # Preenche a opção 063
             campo_opcao.fill("063")
 
             print("Valor do campo:", campo_opcao.input_value())
@@ -65,36 +67,59 @@ def baixar_relatorio():
             # Pressiona Enter
             campo_opcao.press("Enter")
 
-            page.wait_for_timeout(3000)
+            # Aguarda o SSW abrir/processar a opção
+            page.wait_for_timeout(5000)
 
             print("URL após Enter:", page.url)
             print("Título após Enter:", page.title())
 
-            # Mostra o conteúdo da página após o Enter
-            print("HTML após Enter:")
-            print(page.locator("body").inner_text()[:5000])
+            # ==========================================================
+            # DIAGNÓSTICO DAS PÁGINAS ABERTAS
+            # ==========================================================
 
-            # Mostra as páginas abertas
+            print("\n========================================")
+            print("PÁGINAS ABERTAS")
+            print("========================================")
+
             print("Número de páginas:", len(contexto.pages))
 
             for i, pagina in enumerate(contexto.pages):
-                print(f"Página {i}:", pagina.url)
 
-            # Mostra os inputs existentes
-            inputs = page.locator("input")
+                print(f"\n--- PÁGINA {i} ---")
 
-            print("Quantidade de inputs:", inputs.count())
+                print("URL:", pagina.url)
+                print("Título:", pagina.title())
 
-            for i in range(inputs.count()):
-                elemento = inputs.nth(i)
+                print("\nINPUTS:")
 
-                print(
-                    f"INPUT {i} "
-                    f"id={elemento.get_attribute('id')} "
-                    f"name={elemento.get_attribute('name')} "
-                    f"type={elemento.get_attribute('type')} "
-                    f"value={elemento.input_value()}"
-                )
+                inputs = pagina.locator("input")
+
+                print("Quantidade de inputs:", inputs.count())
+
+                for j in range(inputs.count()):
+
+                    elemento = inputs.nth(j)
+
+                    try:
+                        valor = elemento.input_value()
+                    except:
+                        valor = "NÃO FOI POSSÍVEL LER"
+
+                    print(
+                        f"INPUT {j} "
+                        f"id={elemento.get_attribute('id')} "
+                        f"name={elemento.get_attribute('name')} "
+                        f"type={elemento.get_attribute('type')} "
+                        f"value={valor}"
+                    )
+
+                print("\nTEXTO DA PÁGINA:")
+
+                try:
+                    texto = pagina.locator("body").inner_text()
+                    print(texto[:5000])
+                except Exception as erro:
+                    print("Não foi possível ler o texto:", erro)
 
         finally:
             navegador.close()
