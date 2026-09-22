@@ -42,22 +42,35 @@ def baixar_relatorio():
 
             page.wait_for_timeout(5000)
 
-            print("Depois do Enter:", page.url)
-            print("Número de páginas:", len(contexto.pages))
+            print("URL atual:", page.url)
+
+            inputs = page.locator("input")
+            
+            print("Quantidade de inputs:", inputs.count())
+            
+            for i in range(inputs.count()):
+                elemento = inputs.nth(i)
+            
+                print(
+                    "INPUT",
+                    i,
+                    "id=", elemento.get_attribute("id"),
+                    "name=", elemento.get_attribute("name"),
+                    "type=", elemento.get_attribute("type"),
+                    "value=", elemento.get_attribute("value")
+                )
 
             op063 = page
             
-            for i, pagina in enumerate(contexto.pages):
-                print(f"Página {i}: {pagina.url}")
             # with page.expect_popup() as popup_info:
             #     page.keyboard.press("Enter")
 
             # op063 = popup_info.value
             # op063.wait_for_load_state('domcontentloaded')
 
-            op063.locator('[id="5"]').fill('0001')
-            op063.locator('[id="6"]').fill("2359")
-            op063.locator('[id="7"]').fill("s")
+            # op063.locator('[id="5"]').fill('0001')
+            # op063.locator('[id="6"]').fill("2359")
+            # op063.locator('[id="7"]').fill("s")
 
             with op063.expect_download() as download_info:
                 op063.get_by_role("link", name="►").click()
