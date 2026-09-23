@@ -3,6 +3,10 @@ name: Relatório SSW
 on:
   workflow_dispatch:
 
+  schedule:
+    - cron: "30 23 * * 1-5"
+      timezone: "America/Sao_Paulo"
+
 jobs:
   executar-relatorio:
     runs-on: ubuntu-latest
