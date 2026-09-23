@@ -1,21 +1,34 @@
-name: Relatório SSW
+name: Teste Relatório SSW
 
 on:
+  push:
+    branches:
+      - Relatorio-Main
+
   workflow_dispatch:
 
   schedule:
-    - cron: "*/5 * * * 1-5"
+    - cron: "*/5 * * * *"
 
 jobs:
-  teste-agendamento:
+  teste-gatilhos:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Testar agendamento
+      - name: Mostrar gatilho
         run: |
           echo "========================================"
-          echo "O AGENDAMENTO FUNCIONOU!"
+          echo "TESTE DO GITHUB ACTIONS"
           echo "========================================"
-          echo "Data e hora UTC:"
+          echo "Gatilho utilizado:"
+          echo "${{ github.event_name }}"
+          echo ""
+          echo "Branch:"
+          echo "${{ github.ref_name }}"
+          echo ""
+          echo "Commit:"
+          echo "${{ github.sha }}"
+          echo ""
+          echo "Data/hora UTC:"
           date -u
           echo "========================================"
