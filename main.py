@@ -195,6 +195,11 @@ def baixar_relatorio():
                 int(total_volumes)
             )
 
+            enviarEmail(
+                int(total_volumes),
+                cont_expedidor
+            )
+        
         finally:
 
             navegador.close()
