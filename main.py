@@ -2,6 +2,7 @@ from playwright.sync_api import sync_playwright
 import time
 from pathlib import Path
 import os
+import re
 
 pasta_projeto = Path(__file__).resolve().parent
 arquivo_csv = pasta_projeto / "relatorio.csv"
@@ -13,10 +14,13 @@ senha = os.getenv("SSW_SENHA")
 
 
 def baixar_relatorio():
+
     with sync_playwright() as pw:
+
         navegador = pw.chromium.launch(headless=True)
 
         try:
+
             contexto = navegador.new_context()
             page = contexto.new_page()
 
@@ -62,7 +66,11 @@ def baixar_relatorio():
             # ==========================================================
 
             campo_opcao = page.locator('[id="3"]').last
-            campo_opcao.wait_for(state="visible", timeout=60000)
+
+            campo_opcao.wait_for(
+                state="visible",
+                timeout=60000
+            )
 
             campo_opcao.fill("063")
 
@@ -122,11 +130,13 @@ def baixar_relatorio():
                     texto = pagina.locator("body").inner_text()
                     print(texto[:5000])
                 except Exception as erro:
-                    print("Não foi possível ler o texto:", erro)
+                    print(
+                        "Não foi possível ler o texto:",
+                        erro
+                    )
 
             # ==========================================================
-            # PRÓXIMO TESTE
-            # CLICAR NO ► DA PÁGINA 1
+            # CLICAR NO ► DA PÁGINA 063
             # ==========================================================
 
             if len(contexto.pages) > 1:
@@ -134,15 +144,21 @@ def baixar_relatorio():
                 pagina_063 = contexto.pages[1]
 
                 print("\n========================================")
-                print("TESTANDO BOTÃO ► DA PÁGINA 1")
+                print("TESTANDO BOTÃO ► DA PÁGINA 063")
                 print("========================================")
 
-                print("URL da página 063:", pagina_063.url)
+                print(
+                    "URL da página 063:",
+                    pagina_063.url
+                )
 
                 # Localiza os links da página
                 links = pagina_063.locator("a")
 
-                print("Quantidade de links:", links.count())
+                print(
+                    "Quantidade de links:",
+                    links.count()
+                )
 
                 for i in range(links.count()):
 
@@ -161,15 +177,24 @@ def baixar_relatorio():
                     )
 
                 # Localiza o botão pelo texto ►
-                botao = pagina_063.get_by_role("link", name="►")
+                botao = pagina_063.get_by_role(
+                    "link",
+                    name="►"
+                )
 
-                print("Quantidade de botões ►:", botao.count())
+                print(
+                    "Quantidade de botões ►:",
+                    botao.count()
+                )
 
                 if botao.count() > 0:
 
                     print("Botão ► encontrado.")
 
-                    # Tenta observar a requisição feita pelo SSW
+                    # ==================================================
+                    # CAPTURA A RESPOSTA DO SSW
+                    # ==================================================
+
                     with pagina_063.expect_response(
                         "**/bin/**",
                         timeout=30000
@@ -179,12 +204,25 @@ def baixar_relatorio():
 
                     resposta_botao = resposta_063.value
 
-                    print("\nRESPOSTA DO BOTÃO ►")
-                    print("STATUS:", resposta_botao.status)
-                    print("URL:", resposta_botao.url)
+                    print("\n========================================")
+                    print("RESPOSTA DO BOTÃO ►")
+                    print("========================================")
+
+                    print(
+                        "STATUS:",
+                        resposta_botao.status
+                    )
+
+                    print(
+                        "URL:",
+                        resposta_botao.url
+                    )
+
                     print(
                         "TIPO:",
-                        resposta_botao.headers.get("content-type")
+                        resposta_botao.headers.get(
+                            "content-type"
+                        )
                     )
 
                     print(
@@ -192,12 +230,66 @@ def baixar_relatorio():
                         len(resposta_botao.body())
                     )
 
-                    print("CONTEÚDO:")
-                    print(resposta_botao.text()[:5000])
+                    texto_dados = resposta_botao.text()
+
+                    print("\nCONTEÚDO DA RESPOSTA:")
+                    print(texto_dados[:5000])
+
+                    # ==================================================
+                    # NOVO TESTE
+                    # EXTRAI OS REGISTROS <r>...</r>
+                    # ==================================================
+
+                    print("\n========================================")
+                    print("TESTANDO EXTRAÇÃO DOS REGISTROS")
+                    print("========================================")
+
+                    registros = re.findall(
+                        r"<r>(.*?)</r>",
+                        texto_dados,
+                        re.DOTALL
+                    )
+
+                    print(
+                        "Quantidade de registros:",
+                        len(registros)
+                    )
+
+                    # Mostra cada registro encontrado
+                    for numero, registro in enumerate(
+                        registros,
+                        start=1
+                    ):
+
+                        def pegar_campo(nome):
+
+                            resultado = re.search(
+                                rf"<{nome}>(.*?)</{nome}>",
+                                registro,
+                                re.DOTALL
+                            )
+
+                            if resultado:
+                                return resultado.group(1)
+
+                            return ""
+
+                        ctrc = pegar_campo("f0")
+                        volumes = pegar_campo("f13")
+                        usuario = pegar_campo("f20")
+
+                        print(
+                            f"{numero}. "
+                            f"CTRC: {ctrc} | "
+                            f"Volumes: {volumes} | "
+                            f"Usuário: {usuario}"
+                        )
 
                 else:
 
-                    print("ERRO: botão ► não encontrado.")
+                    print(
+                        "ERRO: botão ► não encontrado."
+                    )
 
                 # Aguarda o processamento
                 pagina_063.wait_for_timeout(5000)
@@ -210,15 +302,21 @@ def baixar_relatorio():
                 print("Título:", pagina_063.title())
 
                 print("TEXTO:")
+
                 print(
-                    pagina_063.locator("body").inner_text()[:5000]
+                    pagina_063.locator(
+                        "body"
+                    ).inner_text()[:5000]
                 )
 
             else:
 
-                print("\nERRO: a página 063 não foi aberta.")
+                print(
+                    "\nERRO: a página 063 não foi aberta."
+                )
 
         finally:
+
             navegador.close()
 
 
