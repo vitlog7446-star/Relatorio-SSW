@@ -166,10 +166,14 @@ def baixar_relatorio():
 
                     cont_expedidor[usuario] += 1
 
-                    try:
+                     try:
+                        volumes = volumes.replace(",", ".").strip()
                         total_volumes += float(volumes)
-                    except:
-                        pass
+                    except Exception as erro:
+                        print(
+                            f"Erro ao converter volumes: "
+                            f"'{volumes}' | {erro}"
+                        )
 
             # ==========================================================
             # MOSTRAR RESUMO
