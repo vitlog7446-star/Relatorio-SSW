@@ -3,7 +3,6 @@ from pathlib import Path
 import os
 import re
 
-
 pasta_projeto = Path(__file__).resolve().parent
 arquivo_csv = pasta_projeto / "relatorio.csv"
 
@@ -11,7 +10,6 @@ dominio = os.getenv("SSW_DOMINIO")
 cpf = os.getenv("SSW_CPF")
 user = os.getenv("SSW_USUARIO")
 senha = os.getenv("SSW_SENHA")
-
 
 def baixar_relatorio():
 
@@ -24,9 +22,7 @@ def baixar_relatorio():
             contexto = navegador.new_context()
             page = contexto.new_page()
 
-            # ==========================================================
             # ABRIR SSW
-            # ==========================================================
 
             page.goto(
                 "https://sistema.ssw.inf.br",
@@ -34,9 +30,8 @@ def baixar_relatorio():
                 timeout=60000
             )
 
-            # ==========================================================
+
             # LOGIN
-            # ==========================================================
 
             page.locator('[id="1"]').fill(dominio)
             page.locator('[id="2"]').fill(cpf)
@@ -52,9 +47,7 @@ def baixar_relatorio():
 
             page.wait_for_timeout(3000)
 
-            # ==========================================================
             # ABRIR OPÇÃO 063
-            # ==========================================================
 
             campo_opcao = page.locator('[id="3"]').last
 
@@ -85,6 +78,8 @@ def baixar_relatorio():
             # CLICAR NO BOTÃO ►
             # ==========================================================
 
+            pagina_063.locator('[name="f5"]').fill("0001")
+            pagina_063.locator('[name="f6"]').fill("2359")
             botao = pagina_063.get_by_role(
                 "link",
                 name="►"
@@ -108,9 +103,7 @@ def baixar_relatorio():
 
             texto_dados = resposta_botao.text()
 
-            # ==========================================================
             # EXTRAIR REGISTROS
-            # ==========================================================
 
             registros = re.findall(
                 r"<r>(.*?)</r>",
@@ -123,9 +116,7 @@ def baixar_relatorio():
                 len(registros)
             )
 
-            # ==========================================================
             # USUÁRIOS QUE SERÃO CONSIDERADOS
-            # ==========================================================
 
             usuarios_definidos = [
                 "edusilva",
@@ -141,9 +132,7 @@ def baixar_relatorio():
 
             total_volumes = 0
 
-            # ==========================================================
             # PROCESSAR REGISTROS
-            # ==========================================================
 
             for registro in registros:
 
@@ -208,7 +197,6 @@ def baixar_relatorio():
         finally:
 
             navegador.close()
-
 
 if __name__ == "__main__":
     baixar_relatorio()
