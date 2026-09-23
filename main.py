@@ -26,13 +26,15 @@ def baixar_relatorio():
                 timeout=60000
             )
 
-            # Preenche os dados de login
+            # ==========================================================
+            # LOGIN
+            # ==========================================================
+
             page.locator('[id="1"]').fill(dominio)
             page.locator('[id="2"]').fill(cpf)
             page.locator('[id="3"]').fill(user)
             page.locator('[id="4"]').fill(senha)
 
-            # Login
             with page.expect_response("**/bin/ssw0422") as resposta_login:
                 page.get_by_role("link", name="►").click()
 
@@ -49,32 +51,33 @@ def baixar_relatorio():
             print("CONTEÚDO DA RESPOSTA:")
             print(texto_resposta[:5000])
 
-            # Aguarda o processamento do SSW
+            # Aguarda o processamento do login
             page.wait_for_timeout(5000)
 
             print("URL depois do login:", page.url)
             print("Título:", page.title())
 
-            # Campo da opção
+            # ==========================================================
+            # OPÇÃO 063
+            # ==========================================================
+
             campo_opcao = page.locator('[id="3"]').last
             campo_opcao.wait_for(state="visible", timeout=60000)
 
-            # Preenche a opção 063
             campo_opcao.fill("063")
 
             print("Valor do campo:", campo_opcao.input_value())
 
-            # Pressiona Enter
             campo_opcao.press("Enter")
 
-            # Aguarda o SSW abrir/processar a opção
+            # Aguarda a abertura da tela 063
             page.wait_for_timeout(5000)
 
             print("URL após Enter:", page.url)
             print("Título após Enter:", page.title())
 
             # ==========================================================
-            # DIAGNÓSTICO DAS PÁGINAS ABERTAS
+            # DIAGNÓSTICO DAS PÁGINAS
             # ==========================================================
 
             print("\n========================================")
@@ -120,6 +123,100 @@ def baixar_relatorio():
                     print(texto[:5000])
                 except Exception as erro:
                     print("Não foi possível ler o texto:", erro)
+
+            # ==========================================================
+            # PRÓXIMO TESTE
+            # CLICAR NO ► DA PÁGINA 1
+            # ==========================================================
+
+            if len(contexto.pages) > 1:
+
+                pagina_063 = contexto.pages[1]
+
+                print("\n========================================")
+                print("TESTANDO BOTÃO ► DA PÁGINA 1")
+                print("========================================")
+
+                print("URL da página 063:", pagina_063.url)
+
+                # Localiza os links da página
+                links = pagina_063.locator("a")
+
+                print("Quantidade de links:", links.count())
+
+                for i in range(links.count()):
+
+                    link = links.nth(i)
+
+                    try:
+                        texto = link.inner_text().strip()
+                    except:
+                        texto = ""
+
+                    print(
+                        f"LINK {i} "
+                        f"id={link.get_attribute('id')} "
+                        f"texto={texto} "
+                        f"onclick={link.get_attribute('onclick')}"
+                    )
+
+                # Localiza o botão pelo texto ►
+                botao = pagina_063.get_by_role("link", name="►")
+
+                print("Quantidade de botões ►:", botao.count())
+
+                if botao.count() > 0:
+
+                    print("Botão ► encontrado.")
+
+                    # Tenta observar a requisição feita pelo SSW
+                    with pagina_063.expect_response(
+                        "**/bin/**",
+                        timeout=30000
+                    ) as resposta_063:
+
+                        botao.click()
+
+                    resposta_botao = resposta_063.value
+
+                    print("\nRESPOSTA DO BOTÃO ►")
+                    print("STATUS:", resposta_botao.status)
+                    print("URL:", resposta_botao.url)
+                    print(
+                        "TIPO:",
+                        resposta_botao.headers.get("content-type")
+                    )
+
+                    print(
+                        "TAMANHO:",
+                        len(resposta_botao.body())
+                    )
+
+                    print("CONTEÚDO:")
+                    print(resposta_botao.text()[:5000])
+
+                else:
+
+                    print("ERRO: botão ► não encontrado.")
+
+                # Aguarda o processamento
+                pagina_063.wait_for_timeout(5000)
+
+                print("\n========================================")
+                print("ESTADO DA PÁGINA 063 APÓS CLICAR")
+                print("========================================")
+
+                print("URL:", pagina_063.url)
+                print("Título:", pagina_063.title())
+
+                print("TEXTO:")
+                print(
+                    pagina_063.locator("body").inner_text()[:5000]
+                )
+
+            else:
+
+                print("\nERRO: a página 063 não foi aberta.")
 
         finally:
             navegador.close()
