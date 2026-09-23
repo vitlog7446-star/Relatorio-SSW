@@ -1,8 +1,8 @@
 from playwright.sync_api import sync_playwright
-import time
 from pathlib import Path
 import os
 import re
+
 
 pasta_projeto = Path(__file__).resolve().parent
 arquivo_csv = pasta_projeto / "relatorio.csv"
@@ -24,6 +24,10 @@ def baixar_relatorio():
             contexto = navegador.new_context()
             page = contexto.new_page()
 
+            # ==========================================================
+            # ABRIR SSW
+            # ==========================================================
+
             page.goto(
                 "https://sistema.ssw.inf.br",
                 wait_until="domcontentloaded",
@@ -44,25 +48,13 @@ def baixar_relatorio():
 
             resposta = resposta_login.value
 
-            print("STATUS DO LOGIN:", resposta.status)
-            print("URL DA RESPOSTA:", resposta.url)
-            print("TIPO:", resposta.headers.get("content-type"))
-
-            print("TAMANHO DA RESPOSTA:", len(resposta.body()))
-
-            texto_resposta = resposta.text()
-
-            print("CONTEÚDO DA RESPOSTA:")
-            print(texto_resposta[:5000])
+            print("Login:", resposta.status)
 
             # Aguarda o processamento do login
-            page.wait_for_timeout(5000)
-
-            print("URL depois do login:", page.url)
-            print("Título:", page.title())
+            page.wait_for_timeout(3000)
 
             # ==========================================================
-            # OPÇÃO 063
+            # ABRIR OPÇÃO 063
             # ==========================================================
 
             campo_opcao = page.locator('[id="3"]').last
@@ -73,247 +65,130 @@ def baixar_relatorio():
             )
 
             campo_opcao.fill("063")
-
-            print("Valor do campo:", campo_opcao.input_value())
-
             campo_opcao.press("Enter")
 
             # Aguarda a abertura da tela 063
-            page.wait_for_timeout(5000)
-
-            print("URL após Enter:", page.url)
-            print("Título após Enter:", page.title())
+            page.wait_for_timeout(3000)
 
             # ==========================================================
-            # DIAGNÓSTICO DAS PÁGINAS
+            # LOCALIZAR PÁGINA 063
             # ==========================================================
 
-            print("\n========================================")
-            print("PÁGINAS ABERTAS")
-            print("========================================")
+            if len(contexto.pages) <= 1:
 
-            print("Número de páginas:", len(contexto.pages))
+                print("ERRO: tela 063 não foi aberta.")
+                return
 
-            for i, pagina in enumerate(contexto.pages):
+            pagina_063 = contexto.pages[1]
 
-                print(f"\n--- PÁGINA {i} ---")
-
-                print("URL:", pagina.url)
-                print("Título:", pagina.title())
-
-                print("\nINPUTS:")
-
-                inputs = pagina.locator("input")
-
-                print("Quantidade de inputs:", inputs.count())
-
-                for j in range(inputs.count()):
-
-                    elemento = inputs.nth(j)
-
-                    try:
-                        valor = elemento.input_value()
-                    except:
-                        valor = "NÃO FOI POSSÍVEL LER"
-
-                    print(
-                        f"INPUT {j} "
-                        f"id={elemento.get_attribute('id')} "
-                        f"name={elemento.get_attribute('name')} "
-                        f"type={elemento.get_attribute('type')} "
-                        f"value={valor}"
-                    )
-
-                print("\nTEXTO DA PÁGINA:")
-
-                try:
-                    texto = pagina.locator("body").inner_text()
-                    print(texto[:5000])
-                except Exception as erro:
-                    print(
-                        "Não foi possível ler o texto:",
-                        erro
-                    )
+            print("Tela 063:", pagina_063.title())
 
             # ==========================================================
-            # CLICAR NO ► DA PÁGINA 063
+            # CLICAR NO BOTÃO ►
             # ==========================================================
 
-            if len(contexto.pages) > 1:
+            botao = pagina_063.get_by_role(
+                "link",
+                name="►"
+            )
 
-                pagina_063 = contexto.pages[1]
+            if botao.count() == 0:
 
-                print("\n========================================")
-                print("TESTANDO BOTÃO ► DA PÁGINA 063")
-                print("========================================")
+                print("ERRO: botão ► não encontrado.")
+                return
 
-                print(
-                    "URL da página 063:",
-                    pagina_063.url
-                )
+            with pagina_063.expect_response(
+                "**/bin/**",
+                timeout=30000
+            ) as resposta_063:
 
-                # Localiza os links da página
-                links = pagina_063.locator("a")
+                botao.click()
 
-                print(
-                    "Quantidade de links:",
-                    links.count()
-                )
+            resposta_botao = resposta_063.value
 
-                for i in range(links.count()):
+            print("Consulta:", resposta_botao.status)
 
-                    link = links.nth(i)
+            texto_dados = resposta_botao.text()
 
-                    try:
-                        texto = link.inner_text().strip()
-                    except:
-                        texto = ""
+            # ==========================================================
+            # EXTRAIR REGISTROS
+            # ==========================================================
 
-                    print(
-                        f"LINK {i} "
-                        f"id={link.get_attribute('id')} "
-                        f"texto={texto} "
-                        f"onclick={link.get_attribute('onclick')}"
-                    )
+            registros = re.findall(
+                r"<r>(.*?)</r>",
+                texto_dados,
+                re.DOTALL
+            )
 
-                # Localiza o botão pelo texto ►
-                botao = pagina_063.get_by_role(
-                    "link",
-                    name="►"
-                )
+            print("Registros encontrados:", len(registros))
 
-                print(
-                    "Quantidade de botões ►:",
-                    botao.count()
-                )
+            # ==========================================================
+            # USUÁRIOS QUE SERÃO CONSIDERADOS
+            # ==========================================================
 
-                if botao.count() > 0:
+            usuarios_definidos = [
+                "edusilva",
+                "mabastos",
+                "matorres",
+                "paulod"
+            ]
 
-                    print("Botão ► encontrado.")
+            cont_expedidor = {
+                usuario: 0
+                for usuario in usuarios_definidos
+            }
 
-                    # ==================================================
-                    # CAPTURA A RESPOSTA DO SSW
-                    # ==================================================
+            total_volumes = 0
 
-                    with pagina_063.expect_response(
-                        "**/bin/**",
-                        timeout=30000
-                    ) as resposta_063:
+            # ==========================================================
+            # PROCESSAR REGISTROS
+            # ==========================================================
 
-                        botao.click()
+            for registro in registros:
 
-                    resposta_botao = resposta_063.value
+                def pegar_campo(nome):
 
-                    print("\n========================================")
-                    print("RESPOSTA DO BOTÃO ►")
-                    print("========================================")
-
-                    print(
-                        "STATUS:",
-                        resposta_botao.status
-                    )
-
-                    print(
-                        "URL:",
-                        resposta_botao.url
-                    )
-
-                    print(
-                        "TIPO:",
-                        resposta_botao.headers.get(
-                            "content-type"
-                        )
-                    )
-
-                    print(
-                        "TAMANHO:",
-                        len(resposta_botao.body())
-                    )
-
-                    texto_dados = resposta_botao.text()
-
-                    print("\nCONTEÚDO DA RESPOSTA:")
-                    print(texto_dados[:5000])
-
-                    # ==================================================
-                    # NOVO TESTE
-                    # EXTRAI OS REGISTROS <r>...</r>
-                    # ==================================================
-
-                    print("\n========================================")
-                    print("TESTANDO EXTRAÇÃO DOS REGISTROS")
-                    print("========================================")
-
-                    registros = re.findall(
-                        r"<r>(.*?)</r>",
-                        texto_dados,
+                    resultado = re.search(
+                        rf"<{nome}>(.*?)</{nome}>",
+                        registro,
                         re.DOTALL
                     )
 
-                    print(
-                        "Quantidade de registros:",
-                        len(registros)
-                    )
+                    if resultado:
+                        return resultado.group(1)
 
-                    # Mostra cada registro encontrado
-                    for numero, registro in enumerate(
-                        registros,
-                        start=1
-                    ):
+                    return ""
 
-                        def pegar_campo(nome):
+                volumes = pegar_campo("f13")
+                usuario = pegar_campo("f20").strip()
 
-                            resultado = re.search(
-                                rf"<{nome}>(.*?)</{nome}>",
-                                registro,
-                                re.DOTALL
-                            )
+                if usuario in usuarios_definidos:
 
-                            if resultado:
-                                return resultado.group(1)
+                    cont_expedidor[usuario] += 1
 
-                            return ""
+                    try:
+                        total_volumes += float(volumes)
+                    except:
+                        pass
 
-                        ctrc = pegar_campo("f0")
-                        volumes = pegar_campo("f13")
-                        usuario = pegar_campo("f20")
+            # ==========================================================
+            # MOSTRAR RESUMO
+            # ==========================================================
 
-                        print(
-                            f"{numero}. "
-                            f"CTRC: {ctrc} | "
-                            f"Volumes: {volumes} | "
-                            f"Usuário: {usuario}"
-                        )
+            print()
+            print("========================================")
+            print("RESUMO DA EXPEDIÇÃO")
+            print("========================================")
 
-                else:
-
-                    print(
-                        "ERRO: botão ► não encontrado."
-                    )
-
-                # Aguarda o processamento
-                pagina_063.wait_for_timeout(5000)
-
-                print("\n========================================")
-                print("ESTADO DA PÁGINA 063 APÓS CLICAR")
-                print("========================================")
-
-                print("URL:", pagina_063.url)
-                print("Título:", pagina_063.title())
-
-                print("TEXTO:")
+            for usuario, quantidade in cont_expedidor.items():
 
                 print(
-                    pagina_063.locator(
-                        "body"
-                    ).inner_text()[:5000]
+                    f"{usuario}: "
+                    f"{quantidade} emissão(ões)"
                 )
 
-            else:
-
-                print(
-                    "\nERRO: a página 063 não foi aberta."
-                )
+            print()
+            print("TOTAL DE VOLUMES:", int(total_volumes))
 
         finally:
 
