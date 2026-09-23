@@ -50,7 +50,6 @@ def baixar_relatorio():
 
             print("Login:", resposta.status)
 
-            # Aguarda o processamento do login
             page.wait_for_timeout(3000)
 
             # ==========================================================
@@ -67,7 +66,6 @@ def baixar_relatorio():
             campo_opcao.fill("063")
             campo_opcao.press("Enter")
 
-            # Aguarda a abertura da tela 063
             page.wait_for_timeout(3000)
 
             # ==========================================================
@@ -120,7 +118,10 @@ def baixar_relatorio():
                 re.DOTALL
             )
 
-            print("Registros encontrados:", len(registros))
+            print(
+                "Registros encontrados:",
+                len(registros)
+            )
 
             # ==========================================================
             # USUÁRIOS QUE SERÃO CONSIDERADOS
@@ -166,10 +167,17 @@ def baixar_relatorio():
 
                     cont_expedidor[usuario] += 1
 
-                     try:
-                        volumes = volumes.replace(",", ".").strip()
+                    try:
+
+                        volumes = volumes.replace(
+                            ",",
+                            "."
+                        ).strip()
+
                         total_volumes += float(volumes)
+
                     except Exception as erro:
+
                         print(
                             f"Erro ao converter volumes: "
                             f"'{volumes}' | {erro}"
@@ -192,7 +200,10 @@ def baixar_relatorio():
                 )
 
             print()
-            print("TOTAL DE VOLUMES:", int(total_volumes))
+            print(
+                "TOTAL DE VOLUMES:",
+                int(total_volumes)
+            )
 
         finally:
 
