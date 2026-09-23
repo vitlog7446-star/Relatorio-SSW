@@ -2,6 +2,7 @@ from playwright.sync_api import sync_playwright
 from pathlib import Path
 import os
 import re
+from envio import enviarEmail
 
 pasta_projeto = Path(__file__).resolve().parent
 arquivo_csv = pasta_projeto / "relatorio.csv"
