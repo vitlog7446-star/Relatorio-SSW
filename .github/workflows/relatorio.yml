@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   schedule:
-    - cron: "00 19 * * 1-5"
+    - cron: "08 19 * * 1-5"
 
 jobs:
   executar-relatorio:
